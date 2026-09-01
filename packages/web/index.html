@@ -1,0 +1,65 @@
+<!doctype html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+		<link rel="icon" href="/favicon.ico" sizes="any" />
+		<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png" />
+		<link rel="icon" type="image/png" sizes="16x16" href="/favicon-16.png" />
+		<link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
+		<link rel="manifest" href="/site.webmanifest" />
+		<meta name="theme-color" content="#E8442B" />
+
+		<title>Nashville Campus Radar — free food and study spots today</title>
+		<meta
+			name="description"
+			content="Finds free-food events across Nashville campuses and ranks where to eat and study today."
+		/>
+		<meta name="application-name" content="Nashville Campus Radar" />
+		<meta name="author" content="Nashville Campus Radar" />
+
+		<meta property="og:type" content="website" />
+		<meta property="og:site_name" content="Nashville Campus Radar" />
+		<meta
+			property="og:title"
+			content="Nashville Campus Radar — free food and study spots today"
+		/>
+		<meta
+			property="og:description"
+			content="Finds free-food events across Nashville campuses and ranks where to eat and study today."
+		/>
+		<meta property="og:image" content="/images/og-image.png" />
+		<meta name="twitter:card" content="summary_large_image" />
+		<meta
+			name="twitter:title"
+			content="Nashville Campus Radar — free food and study spots today"
+		/>
+		<meta
+			name="twitter:description"
+			content="Finds free-food events across Nashville campuses and ranks where to eat and study today."
+		/>
+		<meta name="twitter:image" content="/images/og-image.png" />
+
+		<link rel="preconnect" href="https://fonts.googleapis.com" />
+		<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+		<link
+			href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,700;12..96,800&family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700&display=swap"
+			rel="stylesheet"
+		/>
+	</head>
+	<body>
+		<script>
+			// Apply the saved interface theme before first paint, so switching
+			// pages never flashes the default palette.
+			(function () {
+				try {
+					var t = localStorage.getItem("campus-radar.theme");
+					if (t) document.documentElement.setAttribute("data-theme", t);
+				} catch (e) {}
+			})();
+		</script>
+		<div id="root"></div>
+		<script type="module" src="/src/web/main.tsx"></script>
+	</body>
+</html>

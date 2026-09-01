@@ -1,0 +1,14 @@
+{
+  "name": "Nashville Campus Radar",
+  "short_name": "Campus Radar",
+  "description": "Finds free-food events across Nashville campuses and ranks where to eat and study today.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#FBF7F2",
+  "theme_color": "#E8442B",
+  "icons": [
+    { "src": "/favicon-32.png", "sizes": "32x32", "type": "image/png" },
+    { "src": "/apple-touch-icon.png", "sizes": "180x180", "type": "image/png" },
+    { "src": "/images/logo-mark.png", "sizes": "512x512", "type": "image/png" }
+  ]
+}
