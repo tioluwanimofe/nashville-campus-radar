@@ -34,7 +34,7 @@ export const sources = {
         name: z.string().min(2),
         org: z.string().min(2),
         url: z.string().url(),
-        kind: z.enum(["html", "rss", "tribe"]).default("html"),
+        kind: z.enum(["html", "rss", "tribe", "json", "coursedog"]).default("html"),
         adminKey: z.string(),
       }),
     )
