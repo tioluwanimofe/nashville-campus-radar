@@ -444,7 +444,7 @@ function AdminConsole({
     name: "",
     org: "",
     url: "",
-    kind: "html" as "html" | "rss" | "tribe",
+    kind: "html" as "html" | "rss" | "tribe" | "json" | "coursedog",
   });
 
   const submit = (e: React.FormEvent) => {
@@ -623,13 +623,18 @@ function AdminConsole({
           <select
             value={form.kind}
             onChange={(e) =>
-              setForm({ ...form, kind: e.target.value as "html" | "rss" | "tribe" })
+              setForm({
+                ...form,
+                kind: e.target.value as "html" | "rss" | "tribe" | "json" | "coursedog",
+              })
             }
             className="w-full rounded-xl border border-line px-3 py-2 text-sm"
           >
             <option value="html">html</option>
             <option value="rss">rss</option>
             <option value="tribe">tribe</option>
+            <option value="json">json (Trumba)</option>
+            <option value="coursedog">coursedog</option>
           </select>
         </div>
         <button
