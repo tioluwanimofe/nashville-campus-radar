@@ -46,6 +46,11 @@ export function useToggleSource() {
   return useMutation(orpc.sources.toggle.mutationOptions({ onSuccess: invalidate }));
 }
 
+export function useUpdateSource() {
+  const invalidate = useInvalidateAll();
+  return useMutation(orpc.sources.update.mutationOptions({ onSuccess: invalidate }));
+}
+
 export function useRemoveSource() {
   const invalidate = useInvalidateAll();
   return useMutation(orpc.sources.remove.mutationOptions({ onSuccess: invalidate }));
