@@ -60,6 +60,33 @@ export const sources = {
       return { ok: true };
     }),
 
+  /** Edit name/org/url/kind on an existing source in place, keeping its run history. */
+  update: base
+    .input(
+      z.object({
+        id: z.number(),
+        name: z.string().min(2),
+        org: z.string().min(2),
+        url: z.string().url(),
+        kind: z.enum(["html", "rss", "tribe", "json", "coursedog"]),
+        adminKey: z.string(),
+      }),
+    )
+    .handler(async ({ input }) => {
+      assertAdmin(input.adminKey);
+      await getSource(input.id); // 404s if missing
+      try {
+        const [row] = await db
+          .update(schema.sources)
+          .set({ name: input.name, org: input.org, url: input.url, kind: input.kind })
+          .where(eq(schema.sources.id, input.id))
+          .returning();
+        return row;
+      } catch {
+        throw new ORPCError("CONFLICT", { message: "That URL is already a source" });
+      }
+    }),
+
   remove: base.input(z.object({ id: z.number(), adminKey: z.string() })).handler(async ({ input }) => {
     assertAdmin(input.adminKey);
     await db.delete(schema.events).where(eq(schema.events.sourceId, input.id));
