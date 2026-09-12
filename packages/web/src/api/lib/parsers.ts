@@ -1,4 +1,5 @@
 import { absoluteUrl, decodeEntities, htmlToText } from "./fetcher";
+import { extractNuxtState } from "./nuxt-literal";
 
 export type Candidate = {
   title: string | null;
@@ -143,6 +144,126 @@ export function parseJsonLd(html: string, baseUrl: string, limit: number): Candi
         .join("\n"),
     };
   });
+}
+
+type TrumbaEvent = {
+  title?: string;
+  description?: string;
+  location?: string;
+  locationType?: string;
+  startDateTime?: string;
+  endDateTime?: string;
+  dateTimeFormatted?: string;
+  canceled?: boolean;
+  permaLinkUrl?: string;
+  eventActionUrl?: string;
+  categoryCalendar?: string;
+};
+
+/** Trumba's public JSON feed (`trumba.com/calendars/<name>.json`) — used by Belmont. */
+export function parseTrumbaJson(json: string, limit: number): Candidate[] {
+  let parsed: unknown;
+  try {
+    parsed = JSON.parse(json);
+  } catch {
+    return [];
+  }
+  const events = Array.isArray(parsed) ? (parsed as TrumbaEvent[]) : [];
+  return events
+    .filter((e) => !e.canceled && e.title)
+    .slice(0, limit)
+    .map((e) => ({
+      title: e.title ? decodeEntities(e.title) : null,
+      detailUrl: e.permaLinkUrl ?? null,
+      rawText: [
+        `TITLE: ${decodeEntities(e.title ?? "")}`,
+        e.dateTimeFormatted && `DATE: ${decodeEntities(e.dateTimeFormatted)}`,
+        e.startDateTime && `START: ${e.startDateTime}`,
+        e.endDateTime && `END: ${e.endDateTime}`,
+        e.location && `LOCATION: ${e.location}${e.locationType ? ` (${e.locationType})` : ""}`,
+        e.categoryCalendar && `CATEGORY: ${e.categoryCalendar}`,
+        e.description && `DESCRIPTION: ${htmlToText(decodeEntities(e.description), 900)}`,
+      ]
+        .filter(Boolean)
+        .join("\n"),
+    }));
+}
+
+type CoursedogMeeting = {
+  startDate?: string;
+  startTime?: number;
+  endDate?: string;
+  endTime?: number;
+  eventData?: {
+    name?: string;
+    type?: string;
+    description?: string;
+    status?: string;
+    organization?: string;
+    contacts?: Array<{ name?: string; email?: string }>;
+  };
+};
+
+function fmtClock(t: number | undefined): string | null {
+  if (t === undefined || t === null) return null;
+  const h = Math.floor(t / 100);
+  const m = t % 100;
+  return `${String(h).padStart(2, "0")}:${String(m).padStart(2, "0")}`;
+}
+
+/**
+ * Coursedog's embedded events calendar (`*.events.prod.coursedog.com/upcoming`) — used by
+ * Trevecca. The page is server-rendered with the data baked into a `window.__NUXT__` blob
+ * instead of exposing a real JSON endpoint, so we parse that (see nuxt-literal.ts) and walk
+ * `state.meetings.calendar`, a year -> month -> day -> meetingId tree.
+ */
+export function parseCoursedogNuxt(html: string, limit: number): Candidate[] {
+  let state: unknown;
+  try {
+    state = extractNuxtState(html);
+  } catch {
+    return [];
+  }
+  const calendar = (state as { state?: { meetings?: { calendar?: unknown } } })?.state?.meetings?.calendar;
+  if (!calendar || typeof calendar !== "object") return [];
+
+  const out: Candidate[] = [];
+  const seen = new Set<string>();
+  for (const yearNode of Object.values(calendar as Record<string, unknown>)) {
+    if (!yearNode || typeof yearNode !== "object") continue;
+    for (const monthNode of Object.values(yearNode as Record<string, unknown>)) {
+      if (!monthNode || typeof monthNode !== "object") continue;
+      for (const dayNode of Object.values(monthNode as Record<string, unknown>)) {
+        if (!dayNode || typeof dayNode !== "object") continue;
+        for (const meeting of Object.values(dayNode as Record<string, CoursedogMeeting>)) {
+          const ev = meeting?.eventData;
+          if (!ev?.name || ev.status === "Canceled") continue;
+          // The same recurring event appears once per day it meets — keep every instance,
+          // but skip exact duplicate (name + start) rows the feed sometimes repeats.
+          const dedupe = `${ev.name}|${meeting.startDate}|${meeting.startTime}`;
+          if (seen.has(dedupe)) continue;
+          seen.add(dedupe);
+          const contact = ev.contacts?.[0];
+          out.push({
+            title: ev.name,
+            detailUrl: null,
+            rawText: [
+              `TITLE: ${ev.name}`,
+              meeting.startDate && `DATE: ${meeting.startDate}`,
+              `TIME: ${fmtClock(meeting.startTime) ?? "?"} - ${fmtClock(meeting.endTime) ?? "?"}`,
+              ev.type && `TYPE: ${ev.type}`,
+              contact?.name && `CONTACT: ${contact.name}${contact.email ? ` <${contact.email}>` : ""}`,
+              ev.description && `DESCRIPTION: ${htmlToText(ev.description, 900)}`,
+            ]
+              .filter(Boolean)
+              .join("\n"),
+          });
+          if (out.length >= limit) return out;
+        }
+      }
+    }
+  }
+  return out;
 }
 
 /**
