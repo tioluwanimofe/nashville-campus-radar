@@ -5,7 +5,7 @@ export const sources = sqliteTable("sources", {
   id: integer("id").primaryKey({ autoIncrement: true }),
   name: text("name").notNull(),
   org: text("org").notNull(),
-  kind: text("kind").notNull().default("html"), // html | rss | tribe | jsonld
+  kind: text("kind").notNull().default("html"), // html | rss | tribe | json | coursedog (jsonld is an auto-detected sub-case of html)
   url: text("url").notNull().unique(),
   campusLat: real("campus_lat"),
   campusLng: real("campus_lng"),

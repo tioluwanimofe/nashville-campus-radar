@@ -5,7 +5,7 @@
 export type SourceSeed = {
   name: string;
   org: string;
-  kind: "html" | "rss" | "tribe";
+  kind: "html" | "rss" | "tribe" | "json" | "coursedog";
   url: string;
   campusLat?: number;
   campusLng?: number;
@@ -21,10 +21,10 @@ export const SOURCE_SEEDS: SourceSeed[] = [
     campusLng: -86.8027,
   },
   {
-    name: "Belmont University Events",
+    name: "Belmont University Events (Trumba feed)",
     org: "Belmont",
-    kind: "html",
-    url: "https://www.belmont.edu/events/",
+    kind: "json",
+    url: "https://www.trumba.com/calendars/belmont.json",
     campusLat: 36.1327,
     campusLng: -86.7938,
   },
@@ -45,20 +45,12 @@ export const SOURCE_SEEDS: SourceSeed[] = [
     campusLng: -86.7969,
   },
   {
-    name: "Trevecca Events Calendar",
+    name: "Trevecca Events Calendar (Coursedog embed)",
     org: "Trevecca",
-    kind: "html",
-    url: "https://www.trevecca.edu/events",
+    kind: "coursedog",
+    url: "https://tnu.events.prod.coursedog.com/upcoming",
     campusLat: 36.1381,
     campusLng: -86.7443,
-  },
-  {
-    name: "TSU Campus Event Calendar",
-    org: "TSU",
-    kind: "html",
-    url: "https://www.tnstate.edu/campus_life/calendar.aspx",
-    campusLat: 36.1697,
-    campusLng: -86.8288,
   },
   {
     name: "Fisk University Events (WP feed)",
@@ -67,21 +59,5 @@ export const SOURCE_SEEDS: SourceSeed[] = [
     url: "https://www.fisk.edu/wp-json/tribe/events/v1/events?per_page=50",
     campusLat: 36.1685,
     campusLng: -86.8047,
-  },
-  {
-    name: "Nashville Public Library Events",
-    org: "Nashville (non-campus)",
-    kind: "html",
-    url: "https://library.nashville.org/events/upcoming",
-    campusLat: 36.1616,
-    campusLng: -86.7823,
-  },
-  {
-    name: "Eventbrite — Nashville free events",
-    org: "Nashville (non-campus)",
-    kind: "html",
-    url: "https://www.eventbrite.com/d/tn--nashville/free--events/",
-    campusLat: 36.1627,
-    campusLng: -86.7816,
   },
 ];

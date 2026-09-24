@@ -2,7 +2,15 @@ import { eq } from "drizzle-orm";
 import { db } from "../database";
 import * as schema from "../database/schema";
 import { absoluteUrl, fetchPage } from "./fetcher";
-import { type Candidate, parseHtmlChunks, parseJsonLd, parseRss, parseTribe } from "./parsers";
+import {
+  type Candidate,
+  parseCoursedogNuxt,
+  parseHtmlChunks,
+  parseJsonLd,
+  parseRss,
+  parseTribe,
+  parseTrumbaJson,
+} from "./parsers";
 import { type ExtractedEvent, extractEvents } from "./extract";
 
 const MAX_FEED_ITEMS = 60;
@@ -50,8 +58,31 @@ function buildCandidates(source: Source, body: string): { candidates: Candidate[
     return { candidates, mode: "items", note: `RSS feed: ${candidates.length} items parsed` };
   }
   if (source.kind === "tribe") {
+    let parsedOk = true;
+    try {
+      JSON.parse(body);
+    } catch {
+      parsedOk = false;
+    }
     const candidates = parseTribe(body, MAX_FEED_ITEMS);
-    return { candidates, mode: "items", note: `WordPress events API: ${candidates.length} records` };
+    return {
+      candidates,
+      mode: "items",
+      note:
+        candidates.length > 0
+          ? `WordPress events API: ${candidates.length} records`
+          : parsedOk
+            ? "WordPress events API: feed responded fine, 0 events currently listed"
+            : "WordPress events API: response was not valid JSON — feed likely changed shape",
+    };
+  }
+  if (source.kind === "json") {
+    const candidates = parseTrumbaJson(body, MAX_FEED_ITEMS);
+    return { candidates, mode: "items", note: `Trumba calendar feed: ${candidates.length} events` };
+  }
+  if (source.kind === "coursedog") {
+    const candidates = parseCoursedogNuxt(body, MAX_FEED_ITEMS);
+    return { candidates, mode: "items", note: `Coursedog embedded calendar: ${candidates.length} events` };
   }
   const jsonLd = parseJsonLd(body, source.url, MAX_FEED_ITEMS);
   if (jsonLd.length > 0) {
